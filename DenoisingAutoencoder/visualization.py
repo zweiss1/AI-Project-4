@@ -7,11 +7,37 @@ from keras.preprocessing.image import load_img, img_to_array
 
 
 def display_MNIST_samples():
-    # ** YOUR CODE HERE **
-    
+    (xRef,yRef), _ =mnist.load_data()
+    fig, axes = plt.subplots(1,10,figsize=(15,2))
+    digs = set()
+
+    i=0
+    while len(digs) < 10:
+        label = yRef[i]
+        if label not in digs:
+            ax = axes[label]
+            ax.imshow(xRef[i], cmap='gray')
+            ax.set_title(str(label))
+            ax.axis('off')
+            digs.add(label)
+        i+=1
+    plt.show()
 
 def display_NoisyOffice_samples():
-    # ** YOUR CODE HERE **
+    cleanPath = "Noisy_Documents/clean"
+    dirtPath = "Noisy_Documents/noisy"
+    fig, axes = plt.subplots(3,2,figsize=(6,10))
+
+    axes[0,0].set_title("Clean")
+    axes[0,1].set_title("Noisy")
+    for i in range(3):
+        clean = load_img(cleanPath + "/" + str(i) + ".png")
+        dirty = load_img(dirtPath + "/" + str(i) + ".png")
+        axes[i,0].imshow(clean, cmap='gray')
+        axes[i,1].imshow(dirty, cmap='gray')
+        axes[i,0].axis('off')
+        axes[i,1].axis('off')
+    plt.show()
     
 
 display_MNIST_samples()
