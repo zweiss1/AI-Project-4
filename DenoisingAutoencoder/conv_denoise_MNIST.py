@@ -40,7 +40,7 @@ noisy = noisedSet.reshape(xRef.shape[0], xRef.shape[1], xRef.shape[2])
 fig, axes = plt.subplots(3, 10, figsize=(15, 6))
 row_titles = ["Original Images", "Input with Noise Added", "Denoised Output"]
 for ax, title in zip(axes[:, 0], row_titles):
-    ax.set_ylabel(title, fontsize=12)
+    ax.set_ylabel(title, fontsize=12, rotation=90)
 
 digs = set()
 i = 0
@@ -49,11 +49,14 @@ while len(digs) < 10:
     if label not in digs:
         axes[0, label].imshow(originals[i], cmap='gray')
         axes[0, label].set_title(str(label))
-        axes[0, label].axis('off')
         axes[1, label].imshow(noisy[i], cmap='gray')
-        axes[1, label].axis('off')
         axes[2, label].imshow(imgs[i], cmap='gray')
-        axes[2, label].axis('off')
+        for row in range(3):
+            if label == 0:
+                axes[row, label].set_xticks([])
+                axes[row, label].set_yticks([])
+            else:
+                axes[row, label].axis('off')
         digs.add(label)
     i += 1
 
