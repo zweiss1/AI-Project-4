@@ -6,6 +6,9 @@ from keras.layers import Dense
 from matplotlib import pyplot as plt
 import numpy as np
 import random
+import os
+
+os.makedirs("visuals", exist_ok=True)
 
 (xRef,yRef), _ = mnist.load_data() # x is image, y is label
 shapedSet = xRef.reshape(xRef.shape[0],xRef.shape[1]*xRef.shape[2])
@@ -48,6 +51,8 @@ for row in range(3):
             ax.axis('off')
             digs.add(label)
         i+=1
+plt.savefig("visuals/basic_denoise_mnist.png", dpi=150, bbox_inches='tight')
+print("Saved visuals/basic_denoise_mnist.png")
 plt.show()
 
 

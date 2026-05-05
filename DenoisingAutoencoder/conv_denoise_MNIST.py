@@ -6,6 +6,9 @@ from keras.layers import Dense, Conv2D, Flatten, Reshape
 from matplotlib import pyplot as plt
 import numpy as np
 import random
+import os
+
+os.makedirs("visuals", exist_ok=True)
 
 ## ** YOUR CODE HERE **
 
@@ -61,4 +64,6 @@ while len(digs) < 10:
     i += 1
 
 plt.tight_layout()
+plt.savefig("visuals/conv_denoise_mnist.png", dpi=150, bbox_inches='tight')
+print("Saved visuals/conv_denoise_mnist.png")
 plt.show()

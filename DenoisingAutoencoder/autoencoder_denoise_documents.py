@@ -91,9 +91,33 @@ pools = [
     predictionImgs
 ]
 
+os.makedirs("visuals", exist_ok=True)
+
+# Save individual images to visuals/
 for i in range(0, len(predictionImgs)):
     for t in range(0,3):
         img = pools[t][i]
         img = (img * 255).clip(0, 255).astype("uint8")
         im = Image.fromarray(img)
-        im.save("./ingerencetest/inferencetest_img"+str(i)+"_type"+str(t)+".png")
+        im.save("./visuals/doc_inferencetest_img"+str(i)+"_type"+str(t)+".png")
+
+# Create a matplotlib comparison figure (Noisy | Clean | Denoised)
+num_samples = min(len(predictionImgs), 3)
+fig, axes = plt.subplots(num_samples, 3, figsize=(15, 5 * num_samples))
+col_titles = ["Noisy Images", "Clean Images", "Output Denoised Images"]
+
+for col in range(3):
+    axes[0, col].set_title(col_titles[col], fontsize=14)
+
+for i in range(num_samples):
+    axes[i, 0].imshow(pools[0][i], cmap='gray')
+    axes[i, 0].axis('off')
+    axes[i, 1].imshow(pools[1][i], cmap='gray')
+    axes[i, 1].axis('off')
+    axes[i, 2].imshow(pools[2][i], cmap='gray')
+    axes[i, 2].axis('off')
+
+plt.tight_layout()
+plt.savefig("visuals/doc_denoise_comparison.png", dpi=150, bbox_inches='tight')
+print("Saved visuals/doc_denoise_comparison.png")
+plt.show()
