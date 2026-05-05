@@ -11,18 +11,21 @@ import os
 os.makedirs("visuals", exist_ok=True)
 
 (xRef,yRef), _ = mnist.load_data() # x is image, y is label
-shapedSet = xRef.reshape(xRef.shape[0],xRef.shape[1]*xRef.shape[2])
-noisedSet = shapedSet/255.0
+shapedSet = xRef.reshape(xRef.shape[0],xRef.shape[1]*xRef.shape[2])/255.0
 
-noise = np.random.normal(0, 0.1, noisedSet.shape)
+noise = np.random.normal(0, 0.1, shapedSet.shape)
 
-noisedSet = noisedSet + noise
+noisedSet = shapedSet + noise
 noisedImgs = noisedSet.reshape(xRef.shape)
 
 model = Sequential()
-model.add(Dense(xRef.shape[1]*xRef.shape[2]))
-model.compile(optimizer='sgd',loss='mse')
-model.fit(noisedSet,shapedSet,batch_size=32,epochs=15)
+model.add(Dense(xRef.shape[1]*xRef.shape[2], activation='relu'))
+model.add(Dense(int(1/4*xRef.shape[1]*xRef.shape[2]), activation='relu'))
+model.add(Dense(int(1/16*xRef.shape[1]*xRef.shape[2]), activation='relu'))
+model.add(Dense(int(1/4*xRef.shape[1]*xRef.shape[2]), activation='relu'))
+model.add(Dense(xRef.shape[1]*xRef.shape[2], activation='sigmoid'))
+model.compile(optimizer='adam',loss='mse')
+model.fit(noisedSet,shapedSet,batch_size=32,epochs=5)
 
 denoised = model.predict(noisedSet)
 
@@ -54,20 +57,3 @@ for row in range(3):
 plt.savefig("visuals/basic_denoise_mnist.png", dpi=150, bbox_inches='tight')
 print("Saved visuals/basic_denoise_mnist.png")
 plt.show()
-
-
-# xRef = noisedSet.reshape(xRef.shape[0],xRef.shape[1],xRef.shape[2])
-# fig, axes = plt.subplots(1,10,figsize=(15,2))
-# digs = set()
-
-# i=0
-# while len(digs) < 10:
-#     label = yRef[i]
-#     if label not in digs:
-#         ax = axes[label]
-#         ax.imshow(xRef[i], cmap='gray')
-#         ax.set_title(str(label))
-#         ax.axis('off')
-#         digs.add(label)
-#     i+=1
-# plt.show()
