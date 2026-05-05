@@ -76,24 +76,10 @@ def main():
         steps_per_epoch=12
     )
     model.save("autoencoder_540x420_70imgs_5epochs_v1.keras")
+    return model
     
-#main()
+model = main()
 
-model = tf.keras.models.load_model("autoencoder_540x420_70imgs_5epochs_v1.keras")
 features, labels = load_noisy_documents(6, reverse=True, feature_only=False)
 predictions = model.predict(features)
 predictionImgs = predictions.reshape(features.shape[0], features.shape[1], features.shape[2])
-
-# pools = [features, labels, predictionImgs]
-pools = [
-    np.squeeze(features, axis=-1),
-    np.squeeze(labels, axis=-1),
-    predictionImgs
-]
-
-for i in range(0, len(predictionImgs)):
-    for t in range(0,3):
-        img = pools[t][i]
-        img = (img * 255).clip(0, 255).astype("uint8")
-        im = Image.fromarray(img)
-        im.save("./ingerencetest/inferencetest_img"+str(i)+"_type"+str(t)+".png")
