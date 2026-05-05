@@ -5,6 +5,9 @@ from matplotlib import pyplot as plt
 from keras.datasets import mnist
 from keras.preprocessing.image import load_img, img_to_array
 
+# Create visuals folder for saving plots
+os.makedirs("visuals", exist_ok=True)
+
 
 def display_MNIST_samples():
     (xRef,yRef), _ =mnist.load_data()
@@ -21,11 +24,13 @@ def display_MNIST_samples():
             ax.axis('off')
             digs.add(label)
         i+=1
+    plt.savefig("visuals/mnist_samples.png", dpi=150, bbox_inches='tight')
+    print("Saved visuals/mnist_samples.png")
     plt.show()
 
 def display_NoisyOffice_samples():
-    cleanPath = "Noisy_Documents/clean"
-    dirtPath = "Noisy_Documents/noisy"
+    cleanPath = "Noisy_Documents/clean/540x420"
+    dirtPath = "Noisy_Documents/noisy/540x420"
     fig, axes = plt.subplots(3,2,figsize=(6,10))
 
     axes[0,0].set_title("Clean")
@@ -37,6 +42,8 @@ def display_NoisyOffice_samples():
         axes[i,1].imshow(dirty, cmap='gray')
         axes[i,0].axis('off')
         axes[i,1].axis('off')
+    plt.savefig("visuals/noisy_office_samples.png", dpi=150, bbox_inches='tight')
+    print("Saved visuals/noisy_office_samples.png")
     plt.show()
     
 
