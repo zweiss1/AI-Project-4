@@ -1,18 +1,8 @@
  # ** YOUR STUFF HERE **
-
-#NOTE: I haven't actually run this because I train this on the HPC cluster which doesn't have a display.
-#If I were you, I would train the model on the cluster, then copy the saved model back to my local machine 
-# and run the inference and visualization code there.
-# The script that I ran on the HPC cluster is hpc_training.py, which saves the output images instead of 
-# displaying them. You'll need to modify the paths to get it to work, obviously.
-
-import matplotlib
-matplotlib.use("TkAgg")
 from keras.datasets import mnist
 from keras.models import Sequential
 from keras.layers import Dense, Conv2D, Flatten, Reshape, UpSampling2D
 from keras.preprocessing.image import ImageDataGenerator
-from matplotlib import pyplot as plt
 import numpy as np
 import random
 import tensorflow as tf
@@ -24,13 +14,13 @@ import os
 def load_noisy_documents(count, reverse=False, feature_only=False):
     X, Y = [], []
     c = 0
-    for fname in sorted(os.listdir("Noisy_Documents/noisy/540x420/"), reverse=reverse):
+    for fname in sorted(os.listdir("/data/zhanglab/zweiss1/AI-Project-4/DenoisingAutoencoder/Noisy_Documents/noisy/540x420/"), reverse=reverse):
         # load feature image
-        x = Image.open(os.path.join("Noisy_Documents/noisy/540x420", fname)).convert("L")
+        x = Image.open(os.path.join("/data/zhanglab/zweiss1/AI-Project-4/DenoisingAutoencoder/Noisy_Documents/noisy/540x420", fname)).convert("L")
         x = np.array(x).astype("float32") / 255.0
 
         # load label image
-        y = Image.open(os.path.join("Noisy_Documents/clean/540x420", fname)).convert("L")
+        y = Image.open(os.path.join("/data/zhanglab/zweiss1/AI-Project-4/DenoisingAutoencoder/Noisy_Documents/clean/540x420", fname)).convert("L")
         y = np.array(y).astype("float32") / 255.0
 
         # add channel dimension
@@ -69,24 +59,20 @@ def train_autoencoder(model, noisy_source, clean_source, epochs=10):
 
 
 def main():
-    epochs = input("number of epochs (default 10) ")
-    if epochs == "":
-        epochs = 10
-    else:
-        epochs = int(epochs)
+    epochs = 100
     model = build_autoencoder()
-    x, y = load_noisy_documents()
+    x, y = load_noisy_documents(137)
     model.fit(
         x=x,
         y=y,
         epochs=epochs,
-        steps_per_epoch=12
     )
-    model.save("autoencoder_540x420_70imgs_5epochs_v1.keras")
+    model.save("inferencetest_100e/autoencoder_540x420_138imgs_100epochs_v1.keras")
     return model
     
 model = main()
 
+#model = tf.keras.models.load_model("HPC_autoencoder_138imgs_5epochs_540x420.keras")
 features, labels = load_noisy_documents(6, reverse=True, feature_only=False)
 predictions = model.predict(features)
 predictionImgs = predictions.reshape(features.shape[0], features.shape[1], features.shape[2])
@@ -98,33 +84,9 @@ pools = [
     predictionImgs
 ]
 
-os.makedirs("visuals", exist_ok=True)
-
-# Save individual images to visuals/
 for i in range(0, len(predictionImgs)):
     for t in range(0,3):
         img = pools[t][i]
         img = (img * 255).clip(0, 255).astype("uint8")
         im = Image.fromarray(img)
-        im.save("./visuals/doc_inferencetest_img"+str(i)+"_type"+str(t)+".png")
-
-# Create a matplotlib comparison figure (Noisy | Clean | Denoised)
-num_samples = min(len(predictionImgs), 3)
-fig, axes = plt.subplots(num_samples, 3, figsize=(15, 5 * num_samples))
-col_titles = ["Noisy Images", "Clean Images", "Output Denoised Images"]
-
-for col in range(3):
-    axes[0, col].set_title(col_titles[col], fontsize=14)
-
-for i in range(num_samples):
-    axes[i, 0].imshow(pools[0][i], cmap='gray')
-    axes[i, 0].axis('off')
-    axes[i, 1].imshow(pools[1][i], cmap='gray')
-    axes[i, 1].axis('off')
-    axes[i, 2].imshow(pools[2][i], cmap='gray')
-    axes[i, 2].axis('off')
-
-plt.tight_layout()
-plt.savefig("visuals/doc_denoise_comparison.png", dpi=150, bbox_inches='tight')
-print("Saved visuals/doc_denoise_comparison.png")
-plt.show()
+        im.save("./inferencetest_100e/inferencetest_img"+str(i)+"_type"+str(t)+".png")
