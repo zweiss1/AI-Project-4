@@ -14,41 +14,32 @@ import os
 
 
 #Load the noisy documents dataset
-def load_noisy_documents(count, reverse=False, feature_only=False):
+def load_noisy_documents():
     X, Y = [], []
-    c = 0
-    for fname in sorted(os.listdir("Noisy_Documents/noisy/540x420/"), reverse=reverse):
+
+    for fname in sorted(os.listdir("Noisy_Documents/noisy/540x258/")):
         # load feature image
-        x = Image.open(os.path.join("Noisy_Documents/noisy/540x420", fname)).convert("L")
+        x = Image.open(os.path.join("Noisy_Documents/noisy/540x258", fname)).convert("L")
         x = np.array(x).astype("float32") / 255.0
 
         # load label image
-        y = Image.open(os.path.join("Noisy_Documents/clean/540x420", fname)).convert("L")
+        y = Image.open(os.path.join("Noisy_Documents/clean/540x258", fname)).convert("L")
         y = np.array(y).astype("float32") / 255.0
 
         # add channel dimension
         X.append(x[..., None])
         Y.append(y[..., None])
-        c += 1
-        #Shrink the dataset for testing
-        if c > count:
-            break
 
     X = np.array(X)
     Y = np.array(Y)
-    if (feature_only): return X
-    else: return X, Y
+    return X, Y
 
 def build_autoencoder():
     model = Sequential()
     # Encoder
-    model.add(Conv2D(32, 3, activation='relu', padding='same', input_shape=(420, 540, 1)))
+    model.add(Conv2D(32, 3, activation='relu', padding='same', input_shape=(258, 540, 1)))
     model.add(Conv2D(64, 3, strides=2, activation='relu', padding='same'))
-    # Latent Representation (really just a bottleneck)
-    model.add(Conv2D(128, 3, strides=2, activation='relu', padding='same'))
     # Decoder
-    model.add(UpSampling2D())
-    model.add(Conv2D(64, 3, activation='relu', padding='same'))
     model.add(UpSampling2D())
     model.add(Conv2D(32, 3, activation='relu', padding='same'))
     #Output layer
@@ -75,25 +66,7 @@ def main():
         epochs=epochs,
         steps_per_epoch=12
     )
-    model.save("autoencoder_540x420_70imgs_5epochs_v1.keras")
+    model.save("small_encoder_v1.keras")
+
     
-#main()
-
-model = tf.keras.models.load_model("autoencoder_540x420_70imgs_5epochs_v1.keras")
-features, labels = load_noisy_documents(6, reverse=True, feature_only=False)
-predictions = model.predict(features)
-predictionImgs = predictions.reshape(features.shape[0], features.shape[1], features.shape[2])
-
-# pools = [features, labels, predictionImgs]
-pools = [
-    np.squeeze(features, axis=-1),
-    np.squeeze(labels, axis=-1),
-    predictionImgs
-]
-
-for i in range(0, len(predictionImgs)):
-    for t in range(0,3):
-        img = pools[t][i]
-        img = (img * 255).clip(0, 255).astype("uint8")
-        im = Image.fromarray(img)
-        im.save("./ingerencetest/inferencetest_img"+str(i)+"_type"+str(t)+".png")
+main()
