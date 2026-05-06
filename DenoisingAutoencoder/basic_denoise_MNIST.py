@@ -16,6 +16,7 @@ shapedSet = xRef.reshape(xRef.shape[0],xRef.shape[1]*xRef.shape[2])/255.0
 noise = np.random.normal(0, 0.1, shapedSet.shape)
 
 noisedSet = shapedSet + noise
+np.clip(0,noisedSet,1)
 noisedImgs = noisedSet.reshape(xRef.shape)
 
 model = Sequential()
